@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540" font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <defs>
+    <style>
+      .t{fill:#1F2328}.m{fill:#57606A}.s{font-size:13px}.b{font-size:14px;font-weight:700}.tick{font-size:12px;fill:#57606A}
+      .code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px;fill:#0A3069}
+      .msg{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;fill:#1F2328}
+    </style>
+  </defs>
+  <rect x="0.5" y="0.5" width="959" height="539" rx="14" fill="#FFFFFF" stroke="#D0D7DE"/>
+  <text x="32" y="46" class="t" font-size="22" font-weight="700">Хук контекста: /compact до того, как станет поздно</text>
+  <text x="32" y="72" class="m s">Перед каждым вашим сообщением хук читает журнал сессии и считает, насколько заполнено окно контекста</text>
+
+  <!-- bar: x = 32 + 8.96 * pct -->
+  <rect x="32" y="100" width="537.6" height="28" rx="6" fill="#DAFBE1"/>
+  <rect x="569.6" y="100" width="134.4" height="28" fill="#FFF8C5"/>
+  <rect x="704" y="100" width="89.6" height="28" fill="#FFE2BD"/>
+  <rect x="793.6" y="100" width="134.4" height="28" rx="6" fill="#FFEBE9"/>
+  <rect x="793.6" y="100" width="12" height="28" fill="#FFEBE9"/>
+  <text x="300" y="119" text-anchor="middle" class="t s" font-weight="600">работаем спокойно</text>
+
+  <g stroke="#8C959F" stroke-width="1.2">
+    <line x1="569.6" y1="96" x2="569.6" y2="140"/>
+    <line x1="704" y1="96" x2="704" y2="140"/>
+    <line x1="793.6" y1="96" x2="793.6" y2="140"/>
+    <line x1="390.4" y1="128" x2="390.4" y2="140" stroke-dasharray="3 2"/>
+  </g>
+  <text x="32" y="154" class="tick">0%</text>
+  <text x="390.4" y="154" text-anchor="middle" class="tick">40%</text>
+  <text x="569.6" y="154" text-anchor="middle" class="tick" font-weight="700">60%</text>
+  <text x="704" y="154" text-anchor="middle" class="tick" font-weight="700">75%</text>
+  <text x="793.6" y="154" text-anchor="middle" class="tick" font-weight="700">85%</text>
+  <text x="928" y="154" text-anchor="end" class="tick">100%</text>
+
+  <!-- messages -->
+  <rect x="32" y="176" width="288" height="118" rx="10" fill="#FFF8C5" stroke="#D4A72C"/>
+  <text x="48" y="200" class="t b">60% · вам в интерфейсе</text>
+  <text x="48" y="226" class="msg">Контекст ~63%. Запланируй</text>
+  <text x="48" y="244" class="msg">/compact после текущей задачи</text>
+  <text x="48" y="262" class="msg">или фазы плана.</text>
+  <text x="48" y="284" class="m s">модель не отвлекается</text>
+
+  <rect x="336" y="176" width="288" height="118" rx="10" fill="#FFE2BD" stroke="#E09B4A"/>
+  <text x="352" y="200" class="t b">75% · вам и модели</text>
+  <text x="352" y="226" class="msg">Контекст ~76%. После текущего</text>
+  <text x="352" y="244" class="msg">шага стоит сделать /compact.</text>
+  <text x="352" y="266" class="m s">модель доводит шаг, пишет прогресс</text>
+  <text x="352" y="284" class="m s">в план и предлагает /compact</text>
+
+  <rect x="640" y="176" width="288" height="118" rx="10" fill="#FFEBE9" stroke="#FF8182"/>
+  <text x="656" y="200" class="t b">85% · срочно</text>
+  <text x="656" y="226" class="msg">⚠ Контекст ~88%. Сделай</text>
+  <text x="656" y="244" class="msg">/compact сейчас или начни новую</text>
+  <text x="656" y="262" class="msg">сессию: codex -p impl</text>
+  <text x="656" y="284" class="m s">модель не начинает новых шагов</text>
+
+  <text x="32" y="322" class="m s">Каждый порог срабатывает один раз. После /compact, когда заполнение падает ниже 40%, пороги снова активны.</text>
+
+  <!-- profile hints -->
+  <line x1="32" y1="344" x2="928" y2="344" stroke="#D0D7DE" stroke-dasharray="4 4"/>
+  <text x="32" y="374" class="t" font-size="17" font-weight="700">Тот же хук ловит несоответствие профиля задаче</text>
+
+  <rect x="32" y="392" width="440" height="124" rx="10" fill="#DAFBE1" stroke="#4AC26B"/>
+  <text x="48" y="418" class="t b">Рутина на дорогой модели</text>
+  <text x="48" y="440" class="m s">запрос: «переименуй переменную userName»</text>
+  <text x="48" y="466" class="msg">Похоже на рутину, а сессия на</text>
+  <text x="48" y="484" class="msg">gpt-6-astra/high. Дешевле: codex -p fast</text>
+  <text x="48" y="506" class="m s">модель упоминает это и продолжает</text>
+
+  <rect x="488" y="392" width="440" height="124" rx="10" fill="#FBEFFF" stroke="#C297FF"/>
+  <text x="504" y="418" class="t b">Сложная задача на дешёвой модели</text>
+  <text x="504" y="440" class="m s">запрос: «разберись, почему падает оплата»</text>
+  <text x="504" y="466" class="msg">Похоже на сложную задачу, а сессия</text>
+  <text x="504" y="484" class="msg">на gpt-6-luna/low. Для качества: -p deep</text>
+  <text x="504" y="506" class="m s">модель сначала спрашивает, потом меняет код</text>
+</svg>

@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="470" viewBox="0 0 960 470" font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#8C959F"/>
+    </marker>
+    <style>
+      .t{fill:#1F2328}.m{fill:#57606A}.s{font-size:13px}.b{font-size:15px;font-weight:700}
+      .code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px;fill:#0A3069}
+    </style>
+  </defs>
+  <rect x="0.5" y="0.5" width="959" height="469" rx="14" fill="#FFFFFF" stroke="#D0D7DE"/>
+  <text x="32" y="46" class="t" font-size="22" font-weight="700">Роли субагентов: когда делегировать</text>
+  <text x="32" y="72" class="m s">По умолчанию модель работает сама: каждый субагент заново читает свой контекст, и это стоит токенов</text>
+
+  <!-- root -->
+  <rect x="330" y="96" width="300" height="70" rx="12" fill="#FBEFFF" stroke="#C297FF"/>
+  <text x="480" y="124" text-anchor="middle" class="t b">Основная сессия</text>
+  <text x="480" y="148" text-anchor="middle" class="m s">решения, интеграция, финальная проверка</text>
+
+  <g stroke="#8C959F" stroke-width="1.4" fill="none">
+    <path d="M400,166 L130,210" marker-end="url(#a)"/>
+    <path d="M440,166 L360,210" marker-end="url(#a)"/>
+    <path d="M520,166 L600,210" marker-end="url(#a)"/>
+    <path d="M560,166 L830,210" marker-end="url(#a)"/>
+  </g>
+
+  <!-- cheap roles -->
+  <rect x="32" y="214" width="206" height="118" rx="10" fill="#DAFBE1" stroke="#4AC26B"/>
+  <text x="48" y="240" class="t b">explorer</text>
+  <text x="48" y="260" class="code">дешёвая · read-only</text>
+  <text x="48" y="286" class="m s">найти нужные места</text>
+  <text x="48" y="304" class="m s">в большом коде, вернуть</text>
+  <text x="48" y="322" class="m s">короткий отчёт</text>
+
+  <rect x="256" y="214" width="206" height="118" rx="10" fill="#DAFBE1" stroke="#4AC26B"/>
+  <text x="272" y="240" class="t b">worker</text>
+  <text x="272" y="260" class="code">дешёвая · запись</text>
+  <text x="272" y="286" class="m s">независимый кусок</text>
+  <text x="272" y="304" class="m s">в своих файлах,</text>
+  <text x="272" y="322" class="m s">один писатель на файл</text>
+
+  <rect x="480" y="214" width="206" height="118" rx="10" fill="#DAFBE1" stroke="#4AC26B"/>
+  <text x="496" y="240" class="t b">tester · researcher</text>
+  <text x="496" y="260" class="code">дешёвая</text>
+  <text x="496" y="286" class="m s">прогнать и проверить,</text>
+  <text x="496" y="304" class="m s">сверить версию API</text>
+  <text x="496" y="322" class="m s">по документации</text>
+
+  <rect x="704" y="214" width="224" height="118" rx="10" fill="#FBEFFF" stroke="#C297FF"/>
+  <text x="720" y="240" class="t b">reviewer</text>
+  <text x="720" y="260" class="code">сильная · read-only</text>
+  <text x="720" y="286" class="m s">независимое ревью</text>
+  <text x="720" y="304" class="m s">рискованного диффа:</text>
+  <text x="720" y="322" class="m s">auth, деньги, миграции</text>
+
+  <!-- rules -->
+  <rect x="32" y="352" width="440" height="96" rx="10" fill="#F6F8FA" stroke="#D0D7DE"/>
+  <text x="48" y="378" class="t b">Делегировать стоит</text>
+  <text x="48" y="400" class="m s">• чтение 20+ файлов ради 3 нужных мест</text>
+  <text x="48" y="418" class="m s">• 2+ независимых куска в разных файлах</text>
+  <text x="48" y="436" class="m s">• ревью рискованного изменения</text>
+
+  <rect x="488" y="352" width="440" height="96" rx="10" fill="#FFEBE9" stroke="#FF8182"/>
+  <text x="504" y="378" class="t b">Не стоит</text>
+  <text x="504" y="400" class="m s">• мелкие и рутинные задачи — дороже, чем самому</text>
+  <text x="504" y="418" class="m s">• $astra-orchestrator без явной просьбы</text>
+  <text x="504" y="436" class="m s">• в Codex App без проверки модели (баг #32587)</text>
+</svg>

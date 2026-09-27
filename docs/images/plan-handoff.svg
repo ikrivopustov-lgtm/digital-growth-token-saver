@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="420" viewBox="0 0 960 420" font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#57606A"/>
+    </marker>
+    <style>
+      .t{fill:#1F2328}.m{fill:#57606A}.s{font-size:13px}.b{font-size:15px;font-weight:700}
+      .code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;fill:#0A3069}
+    </style>
+  </defs>
+  <rect x="0.5" y="0.5" width="959" height="419" rx="14" fill="#FFFFFF" stroke="#D0D7DE"/>
+  <text x="32" y="46" class="t" font-size="22" font-weight="700">План сильной моделью → код дешёвой</text>
+  <text x="32" y="72" class="m s">Файл плана заменяет длинную историю чата: новая сессия начинает с него, а не с 200 тысяч токенов контекста</text>
+
+  <!-- session 1 -->
+  <rect x="32" y="100" width="300" height="250" rx="12" fill="#FBEFFF" stroke="#C297FF"/>
+  <text x="52" y="130" class="t b">Сессия 1 · думать</text>
+  <text x="52" y="154" class="code">codex -p deep</text>
+  <text x="52" y="174" class="m s">сильная модель, effort high</text>
+  <rect x="52" y="192" width="260" height="34" rx="8" fill="#FFFFFF" stroke="#D8B9FF"/>
+  <text x="66" y="214" class="code">$aif-explore</text><text x="190" y="214" class="m s">если неясно</text>
+  <rect x="52" y="236" width="260" height="34" rx="8" fill="#FFFFFF" stroke="#D8B9FF"/>
+  <text x="66" y="258" class="code">$aif-plan full | ultra</text>
+  <rect x="52" y="280" width="260" height="34" rx="8" fill="#FFFFFF" stroke="#D8B9FF"/>
+  <text x="66" y="302" class="t s">вы читаете план → «ок»</text>
+  <text x="52" y="336" class="m s">потом /compact или выход</text>
+
+  <path d="M332,225 L380,225" stroke="#57606A" stroke-width="1.6" marker-end="url(#a)"/>
+
+  <!-- plan file -->
+  <rect x="384" y="150" width="192" height="150" rx="10" fill="#FFF8C5" stroke="#D4A72C"/>
+  <path d="M548,150 L576,178 L548,178 z" fill="#F5E0A0" stroke="#D4A72C"/>
+  <text x="400" y="180" class="t b">План</text>
+  <text x="400" y="206" class="code">.ai-factory/plans/</text>
+  <text x="400" y="232" class="m s">задачи с чекбоксами,</text>
+  <text x="400" y="252" class="m s">файлы, критерии,</text>
+  <text x="400" y="272" class="m s">команды проверки</text>
+
+  <path d="M576,225 L624,225" stroke="#57606A" stroke-width="1.6" marker-end="url(#a)"/>
+
+  <!-- session 2 -->
+  <rect x="628" y="100" width="300" height="250" rx="12" fill="#DAFBE1" stroke="#4AC26B"/>
+  <text x="648" y="130" class="t b">Сессия 2 · делать</text>
+  <text x="648" y="154" class="code">codex -p impl</text>
+  <text x="648" y="174" class="m s">дешёвая модель, effort medium</text>
+  <rect x="648" y="192" width="260" height="34" rx="8" fill="#FFFFFF" stroke="#8DDB9E"/>
+  <text x="662" y="214" class="code">$aif-implement</text><text x="786" y="214" class="m s">по задачам</text>
+  <rect x="648" y="236" width="260" height="34" rx="8" fill="#FFFFFF" stroke="#8DDB9E"/>
+  <text x="662" y="258" class="t s">тесты затронутого кода</text>
+  <rect x="648" y="280" width="260" height="34" rx="8" fill="#FFFFFF" stroke="#8DDB9E"/>
+  <text x="662" y="302" class="code">$aif-verify</text><text x="760" y="302" class="m s">→</text><text x="778" y="302" class="code">$aif-commit</text>
+  <text x="648" y="336" class="m s">2 неудачи подряд → назад в deep</text>
+
+  <text x="32" y="392" class="m s">Для задач уровня feature хватает</text>
+  <text x="238" y="392" class="code">$aif-plan fast</text>
+  <text x="352" y="392" class="m s">в текущей сессии. Мелочь и рутина не планируются: план дороже самой правки.</text>
+</svg>

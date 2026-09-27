@@ -1,0 +1,8 @@
+# codex-token-saver profile: fast
+# Рутина: переименования, формат, тексты, тесты по образцу, мелкие фиксы.
+# Запуск: codex -p fast   (или codex exec -p fast "...")
+model = "{{CHEAP_MODEL}}"
+model_reasoning_effort = "low"
+
+[agents]
+enabled = false

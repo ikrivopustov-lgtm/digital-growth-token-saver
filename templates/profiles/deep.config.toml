@@ -1,0 +1,5 @@
+# codex-token-saver profile: deep
+# Архитектура, $aif-plan full/ultra, сложная отладка, безопасность, миграции.
+# Запуск: codex -p deep
+model = "{{STRONG_MODEL}}"
+model_reasoning_effort = "high"

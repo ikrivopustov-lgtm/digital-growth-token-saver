@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="500" viewBox="0 0 960 500" font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#8C959F"/>
+    </marker>
+    <style>
+      .t{fill:#1F2328}.m{fill:#57606A}.s{font-size:13px}.h{font-size:13px;font-weight:700;fill:#57606A;letter-spacing:.04em}
+      .code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px;fill:#0A3069}
+      .b{font-size:14px;font-weight:700}
+    </style>
+  </defs>
+  <rect x="0.5" y="0.5" width="959" height="499" rx="14" fill="#FFFFFF" stroke="#D0D7DE"/>
+  <text x="32" y="46" class="t" font-size="22" font-weight="700">Триаж: какой процесс и какой профиль</text>
+  <text x="32" y="72" class="m s">Модель пишет класс задачи первой строкой ответа. Хук подсказывает, если профиль не подходит.</text>
+
+  <text x="48" y="112" class="h">КЛАСС</text>
+  <text x="196" y="112" class="h">ПРИЗНАКИ</text>
+  <text x="456" y="112" class="h">ПРОЦЕСС</text>
+  <text x="728" y="112" class="h">ПРОФИЛЬ</text>
+
+  <!-- tiny -->
+  <rect x="32" y="124" width="896" height="76" rx="10" fill="#F6F8FA" stroke="#D0D7DE"/>
+  <rect x="48" y="146" width="120" height="32" rx="16" fill="#EAEEF2"/>
+  <text x="108" y="167" text-anchor="middle" class="t b">tiny</text>
+  <text x="196" y="158" class="t s">1 файл, понятно что менять,</text>
+  <text x="196" y="178" class="t s">меньше 20 строк</text>
+  <text x="456" y="168" class="t s">сразу делать, без плана</text>
+  <text x="728" y="168" class="m s">текущий</text>
+
+  <!-- routine -->
+  <rect x="32" y="210" width="896" height="76" rx="10" fill="#F6F8FA" stroke="#D0D7DE"/>
+  <rect x="48" y="232" width="120" height="32" rx="16" fill="#DAFBE1"/>
+  <text x="108" y="253" text-anchor="middle" class="t b" fill="#116329">routine</text>
+  <text x="196" y="244" class="t s">переименование, формат, тексты,</text>
+  <text x="196" y="264" class="t s">тесты по образцу, bump, мелкий фикс</text>
+  <text x="456" y="244" class="t s">сразу делать,</text>
+  <text x="456" y="264" class="t s">проверять только затронутое</text>
+  <text x="728" y="244" class="code">codex -p fast</text>
+  <text x="728" y="264" class="m s">дешёвая модель · low</text>
+
+  <!-- feature -->
+  <rect x="32" y="296" width="896" height="76" rx="10" fill="#F6F8FA" stroke="#D0D7DE"/>
+  <rect x="48" y="318" width="120" height="32" rx="16" fill="#DDF4FF"/>
+  <text x="108" y="339" text-anchor="middle" class="t b">feature</text>
+  <text x="196" y="330" class="t s">2+ файла, новая логика,</text>
+  <text x="196" y="350" class="t s">требования понятны</text>
+  <text x="456" y="330" class="code">$aif-plan fast</text>
+  <path d="M566,326 L590,326" stroke="#8C959F" stroke-width="1.4" marker-end="url(#a)"/>
+  <text x="596" y="330" class="t s">«ок»</text>
+  <text x="456" y="352" class="code">→ $aif-implement</text>
+  <text x="728" y="330" class="m s">план: текущий</text>
+  <text x="728" y="352" class="code">код: codex -p impl</text>
+
+  <!-- deep -->
+  <rect x="32" y="382" width="896" height="96" rx="10" fill="#FBEFFF" stroke="#C297FF"/>
+  <rect x="48" y="414" width="120" height="32" rx="16" fill="#E9DBFF"/>
+  <text x="108" y="435" text-anchor="middle" class="t b">deep</text>
+  <text x="196" y="410" class="t s">архитектура, auth, деньги,</text>
+  <text x="196" y="430" class="t s">миграции, гонки, непонятный</text>
+  <text x="196" y="450" class="t s">баг, 10+ файлов</text>
+  <text x="456" y="410" class="code">$aif-explore (если неясно)</text>
+  <text x="456" y="432" class="code">$aif-plan full | ultra</text>
+  <text x="456" y="454" class="t s">новая сессия → </text><text x="556" y="454" class="code">$aif-implement</text>
+  <text x="728" y="410" class="code">план: codex -p deep</text>
+  <text x="728" y="432" class="m s">сильная модель · high</text>
+  <text x="728" y="454" class="code">код: codex -p impl</text>
+</svg>

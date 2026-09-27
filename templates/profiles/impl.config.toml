@@ -1,0 +1,5 @@
+# codex-token-saver profile: impl
+# Реализация готового плана ai-factory ($aif-implement) дешёвой моделью.
+# Запуск: codex -p impl
+model = "{{CHEAP_MODEL}}"
+model_reasoning_effort = "medium"

@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="560" viewBox="0 0 960 560" font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#57606A"/>
+    </marker>
+    <style>
+      .t{fill:#1F2328}.m{fill:#57606A}.code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;fill:#0A3069}
+      .h{font-size:15px;font-weight:700}.s{font-size:13px}
+    </style>
+  </defs>
+  <rect x="0.5" y="0.5" width="959" height="559" rx="14" fill="#FFFFFF" stroke="#D0D7DE"/>
+
+  <text x="32" y="46" class="t" font-size="22" font-weight="700">Что ставит одна команда install.sh</text>
+  <text x="32" y="72" class="m s">Сверху — постоянные файлы, снизу — что вы получаете в каждой сессии Codex</text>
+
+  <!-- installer -->
+  <rect x="32" y="150" width="170" height="120" rx="12" fill="#DDF4FF" stroke="#54AEFF"/>
+  <text x="117" y="190" text-anchor="middle" class="t h">install.sh</text>
+  <text x="117" y="214" text-anchor="middle" class="code">--project .</text>
+  <text x="117" y="244" text-anchor="middle" class="m s">идемпотентно,</text>
+  <text x="117" y="261" text-anchor="middle" class="m s">с бэкапами</text>
+
+  <path d="M202,190 L246,140" stroke="#57606A" stroke-width="1.6" fill="none" marker-end="url(#arr)"/>
+  <path d="M202,230 L246,276" stroke="#57606A" stroke-width="1.6" fill="none" marker-end="url(#arr)"/>
+
+  <!-- global panel -->
+  <rect x="250" y="96" width="678" height="116" rx="12" fill="#F6F8FA" stroke="#D0D7DE"/>
+  <text x="270" y="122" class="t h">Глобально, один раз</text>
+  <text x="270" y="150" class="code">~/.codex/fast · impl · deep.config.toml</text>
+  <text x="600" y="150" class="m s">профили: модель + effort</text>
+  <text x="270" y="174" class="code">~/.codex/token-saver/</text>
+  <text x="600" y="174" class="m s">хук контекста, tsctl, delegate.sh</text>
+  <text x="270" y="198" class="code">~/.agents/skills/codex-token-saver/</text>
+  <text x="600" y="198" class="m s">скилл $codex-token-saver</text>
+
+  <!-- project panel -->
+  <rect x="250" y="226" width="678" height="164" rx="12" fill="#F6F8FA" stroke="#D0D7DE"/>
+  <text x="270" y="252" class="t h">В каждый проект</text>
+  <text x="270" y="280" class="code">.ai-factory/  +  $aif-*</text>
+  <text x="600" y="280" class="m s">plan-first: план → реализация</text>
+  <text x="270" y="304" class="code">.codex/agents/*.toml</text>
+  <text x="600" y="304" class="m s">роли: сильная / дешёвая модель</text>
+  <text x="270" y="328" class="code">.codex/config.toml</text>
+  <text x="600" y="328" class="m s">слияние ai-factory + ролей</text>
+  <text x="270" y="352" class="code">.codex/hooks.json</text>
+  <text x="600" y="352" class="m s">сигналы про контекст и профиль</text>
+  <text x="270" y="376" class="code">AGENTS.md</text>
+  <text x="600" y="376" class="m s">блок правил token discipline</text>
+
+  <!-- results -->
+  <line x1="32" y1="420" x2="928" y2="420" stroke="#D0D7DE" stroke-dasharray="4 4"/>
+  <text x="32" y="450" class="t h">Что меняется в работе</text>
+
+  <rect x="32" y="466" width="212" height="66" rx="10" fill="#DAFBE1" stroke="#4AC26B"/>
+  <text x="138" y="494" text-anchor="middle" class="t s" font-weight="600">Рутина — на дешёвой</text>
+  <text x="138" y="514" text-anchor="middle" class="m s">модели, effort low</text>
+
+  <rect x="256" y="466" width="212" height="66" rx="10" fill="#FBEFFF" stroke="#C297FF"/>
+  <text x="362" y="494" text-anchor="middle" class="t s" font-weight="600">План — сильной,</text>
+  <text x="362" y="514" text-anchor="middle" class="m s">код — дешёвой моделью</text>
+
+  <rect x="480" y="466" width="212" height="66" rx="10" fill="#FFF8C5" stroke="#D4A72C"/>
+  <text x="586" y="494" text-anchor="middle" class="t s" font-weight="600">/compact вовремя</text>
+  <text x="586" y="514" text-anchor="middle" class="m s">на 60 / 75 / 85 %</text>
+
+  <rect x="704" y="466" width="224" height="66" rx="10" fill="#DDF4FF" stroke="#54AEFF"/>
+  <text x="816" y="494" text-anchor="middle" class="t s" font-weight="600">Меньше шума</text>
+  <text x="816" y="514" text-anchor="middle" class="m s">в контексте каждого хода</text>
+</svg>
