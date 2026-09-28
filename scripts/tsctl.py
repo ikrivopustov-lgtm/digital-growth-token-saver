@@ -249,25 +249,65 @@ def cmd_hooks(a) -> int:
 # ---------------------------------------------------------------- global-config
 
 
+TABLE_RE = re.compile(r"^\s*\[")
+
+
+def _set_top_key(lines: list[str], key: str, value: str) -> None:
+    """Заменить или вставить верхнеуровневую строку `key = value` до первой таблицы."""
+    kre = re.compile(rf"^\s*{re.escape(key)}\s*=")
+    first_table = next((i for i, l in enumerate(lines) if TABLE_RE.match(l)), len(lines))
+    for i in range(first_table):
+        if kre.match(lines[i]):
+            lines[i] = f"{key} = {value}\n"
+            return
+    at = first_table
+    while at > 0 and not lines[at - 1].strip():  # вставляем над пустыми строками перед таблицей
+        at -= 1
+    if at > 0 and not lines[at - 1].endswith("\n"):
+        lines[at - 1] += "\n"
+    lines.insert(at, f"{key} = {value}\n")
+
+
+def _set_features_hooks(lines: list[str]) -> None:
+    hdr = next((i for i, l in enumerate(lines) if re.match(r"^\s*\[features\]\s*(#.*)?$", l)), None)
+    if hdr is None:
+        if lines and not lines[-1].endswith("\n"):
+            lines[-1] += "\n"
+        if lines and lines[-1].strip():
+            lines.append("\n")
+        lines += ["[features]\n", "hooks = true\n"]
+        return
+    end = next((i for i in range(hdr + 1, len(lines)) if TABLE_RE.match(lines[i])), len(lines))
+    for i in range(hdr + 1, end):
+        if re.match(r"^\s*hooks\s*=", lines[i]):
+            lines[i] = "hooks = true\n"
+            return
+    lines.insert(hdr + 1, "hooks = true\n")
+
+
 def cmd_global_config(a) -> int:
+    """Точечная правка: трогаем только model, model_reasoning_effort и features.hooks.
+    Остальной текст (комментарии, plugins, trust проектов от приложения Codex) не меняется."""
     p = HOME / "config.toml"
-    cur = load_toml(p)
-    new = dict(cur)
+    cur = p.read_text(encoding="utf-8") if p.exists() else ""
+    tomllib.loads(cur)  # не трогаем битый файл
+    lines = cur.splitlines(keepends=True)
     if a.model:
-        new["model"] = a.model
+        _set_top_key(lines, "model", _str(a.model))
     if a.effort:
-        new["model_reasoning_effort"] = a.effort
+        _set_top_key(lines, "model_reasoning_effort", _str(a.effort))
     if a.hooks:
-        new["features"] = dict(new.get("features", {}))
-        new["features"]["hooks"] = True
-    if new == cur:
-        print("  = ~/.codex/config.toml: без изменений")
-        return 0
-    # верхнеуровневые ключи должны идти до таблиц — dump_toml это гарантирует
-    text = "# Managed in part by codex-token-saver. Backups: config.toml.bak-*\n" + dump_toml(new)
-    validate_roundtrip(text)
-    if p.exists() and "#" in p.read_text(encoding="utf-8"):
-        print("  ! комментарии в ~/.codex/config.toml не сохранятся (оригинал — в бэкапе)")
+        _set_features_hooks(lines)
+    text = "".join(lines)
+    try:
+        d = tomllib.loads(text)
+        ok = (not a.model or d.get("model") == a.model) and (not a.hooks or d.get("features", {}).get("hooks") is True)
+    except tomllib.TOMLDecodeError:
+        ok = False
+    if not ok:
+        print(f"  ! {p}: необычная структура (например, features задан инлайн) — правлю не буду. "
+              f"Добавь вручную: model = {_str(a.model or '...')}, [features] hooks = true")
+        return 1
     write(p, text, a.dry_run, "~/.codex/config.toml")
     return 0
 

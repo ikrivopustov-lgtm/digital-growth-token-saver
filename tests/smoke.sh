@@ -57,7 +57,21 @@ FAKE_MODEL=gpt-6-luna bash "$HOME/.codex/token-saver/delegate.sh" "task" 2>&1 | 
 FAKE_MODEL=gpt-6-astra bash "$HOME/.codex/token-saver/delegate.sh" "task" 2>&1 | grep -q "MODEL MISMATCH" && pass "подмена модели поймана" || fail "delegate mismatch"
 
 echo "5. Глобально: модель по умолчанию (вариант 1) и правила/хук для всех чатов (вариант 2)"
-printf '# my comment\nmodel = "gpt-6-astra"\napproval_policy = "on-request"\n\n[mcp_servers.x]\ncommand = "x"\n' > "$HOME/.codex/config.toml"
+cat > "$HOME/.codex/config.toml" <<'EOF2'
+# my comment
+model = "gpt-6-astra"   # выбрано в приложении
+approval_policy = "on-request"
+
+[mcp_servers.x]
+command = "x"
+
+[projects."/Users/me/code/app"]
+trust_level = "trusted"
+
+[features]
+plugins = true   # от приложения
+EOF2
+cp "$HOME/.codex/config.toml" "$T/cfg.before"
 printf '# Мои глобальные правила\n' > "$HOME/.codex/AGENTS.md"
 bash "$ROOT/scripts/install.sh" --no-project --default-model gpt-6-sol --global-rules --yes > "$T/g.log" 2>&1 || { cat "$T/g.log"; fail "install --no-project"; }
 python3 - "$HOME/.codex/config.toml" <<'EOF2' && pass "config.toml: model=sol/medium, hooks=true, остальное сохранено" || fail "global config.toml"
@@ -65,6 +79,9 @@ import sys, tomllib; d = tomllib.load(open(sys.argv[1], "rb"))
 assert d["model"] == "gpt-6-sol" and d["model_reasoning_effort"] == "medium"
 assert d["features"]["hooks"] is True and d["approval_policy"] == "on-request" and d["mcp_servers"]["x"]["command"] == "x"
 EOF2
+diff <(grep -v '^model = \|^model_reasoning_effort = \|^hooks = ' "$T/cfg.before") <(grep -v '^model = \|^model_reasoning_effort = \|^hooks = ' "$HOME/.codex/config.toml") > /dev/null \
+  && grep -q "# my comment" "$HOME/.codex/config.toml" && grep -q "plugins = true   # от приложения" "$HOME/.codex/config.toml" \
+  && pass "config.toml: правка точечная — комментарии, trust и plugins не тронуты" || fail "config.toml переписан целиком"
 ls "$HOME/.codex"/config.toml.bak-* >/dev/null 2>&1 && pass "бэкап config.toml" || fail "нет бэкапа"
 grep -q context_guard.py "$HOME/.codex/hooks.json" && pass "глобальный хук" || fail "~/.codex/hooks.json"
 grep -q "Мои глобальные правила" "$HOME/.codex/AGENTS.md" && grep -q "codex-token-saver:start" "$HOME/.codex/AGENTS.md" && pass "~/.codex/AGENTS.md: блок добавлен, старое сохранено" || fail "global AGENTS.md"
@@ -83,5 +100,14 @@ roll 175000 gpt-6-sol medium; a="$(ev g3 gpt-6-sol "дальше")"; b="$(ev g3 
 cd "$T/proj"; roll 50000 gpt-6-astra high
 bash "$ROOT/scripts/install.sh" --no-project --dry-run --default-model gpt-6-luna --global-rules --yes > /dev/null 2>&1
 grep -q '"gpt-6-sol"' "$HOME/.codex/config.toml" && pass "dry-run ничего не пишет" || fail "dry-run записал"
+
+echo "6. Повторная установка из ~/.codex/token-saver/install.sh"
+mkdir -p "$T/proj3" && cd "$T/proj3" && git init -q
+bash "$HOME/.codex/token-saver/install.sh" --project . --skip-aif --skip-astra --yes > "$T/re.log" 2>&1 || { cat "$T/re.log"; fail "установка копией из ~/.codex/token-saver"; }
+grep -q "codex-token-saver:start" AGENTS.md && pass "установка во второй проект копией установщика" || fail "AGENTS.md во втором проекте"
+bash "$HOME/.codex/token-saver/install.sh" --no-project --global-rules --yes > "$T/re2.log" 2>&1 && pass "--global-rules из копии установщика" || { cat "$T/re2.log"; fail "--global-rules из копии"; }
+mv "$HOME/.agents" "$T/agents.off"
+bash "$HOME/.codex/token-saver/install.sh" --project . --yes > "$T/re3.log" 2>&1 && fail "без скилла должна быть ошибка" || grep -q "Не найдены файлы скилла" "$T/re3.log" && pass "без скилла — понятная ошибка"
+mv "$T/agents.off" "$HOME/.agents"
 
 echo; echo "Все проверки пройдены."

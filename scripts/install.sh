@@ -68,6 +68,11 @@ done
 CODEX_HOME="${CODEX_HOME:-$HOME/.codex}"
 TS_HOME="$CODEX_HOME/token-saver"
 SKILL_HOME="$HOME/.agents/skills/codex-token-saver"
+# Копия установщика в ~/.codex/token-saver/ лежит без SKILL.md и templates/ — берём их из скилла
+if [ ! -f "$SRC/SKILL.md" ] || [ ! -d "$SRC/templates" ]; then
+  if [ -f "$SKILL_HOME/SKILL.md" ] && [ -d "$SKILL_HOME/templates" ]; then SRC="$SKILL_HOME"
+  else echo "Не найдены файлы скилла (SKILL.md, templates/) ни в $SRC, ни в $SKILL_HOME. Запусти install.sh из клона репозитория." >&2; exit 1; fi
+fi
 PROJECT="$(cd "$PROJECT" && pwd)"
 DRYFLAG=""; [ "$DRY" = 1 ] && DRYFLAG="--dry-run"
 
@@ -82,6 +87,7 @@ confirm() {
 
 # ---------------------------------------------------------------- preflight
 say "0. Проверка окружения"
+info "! Закрой приложение Codex перед установкой: оно само пишет в ~/.codex/config.toml"
 PY=""
 for c in python3.13 python3.12 python3.11 python3 /opt/homebrew/bin/python3 /usr/local/bin/python3; do
   if command -v "$c" >/dev/null 2>&1 && "$c" -c 'import sys,tomllib; sys.exit(0 if sys.version_info>=(3,11) else 1)' 2>/dev/null; then
