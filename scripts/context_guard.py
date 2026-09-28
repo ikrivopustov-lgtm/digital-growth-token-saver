@@ -12,6 +12,7 @@
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import re
@@ -143,7 +144,8 @@ def profile_hint(prompt: str, model: str, effort: str, s: dict):
     strong, cheap = s["strong_model"], s["cheap_model"]
     effort = (effort or "").lower()
     is_strong = bool(model) and model == strong and effort not in WEAK_EFFORTS
-    is_weak = (bool(model) and model == cheap) or effort in WEAK_EFFORTS
+    # всё, что не сильная модель (Luna, Sol и т.п.), на сложной задаче считаем слабым
+    is_weak = (bool(model) and model != strong) or effort in WEAK_EFFORTS
     deep = bool(DEEP_RE.search(prompt)) or len(prompt) > 1500
     routine = bool(ROUTINE_RE.search(prompt)) and not deep and len(prompt) < 400
     if routine and is_strong:
@@ -153,8 +155,33 @@ def profile_hint(prompt: str, model: str, effort: str, s: dict):
     if deep and is_weak:
         return ("to_deep",
                 f"Похоже на сложную задачу, а сессия на {model or '?'}/{effort or '?'}. "
-                f"Для качества: `codex -p deep` или `/model {strong}` c effort high.")
+                f"Для качества: `/model {strong}` c effort high (в приложении — выбрать {strong} "
+                f"в списке моделей) или `codex -p deep`.")
     return None
+
+
+def first_run(data: dict) -> bool:
+    """Хук может стоять и глобально, и в проекте — Codex вызовет оба. Отвечает только первый.
+    Ключ включает размер rollout, так что повтор того же текста следующим ходом не глушится."""
+    size = ""
+    try:
+        size = str(Path(data["transcript_path"]).stat().st_size)
+    except Exception:
+        pass
+    raw = f"{data.get('session_id')}\0{data.get('prompt')}\0{size}"
+    key = hashlib.sha1(raw.encode("utf-8", "replace")).hexdigest()[:16]
+    lock = STATE_DIR / f"once-{key}.lock"
+    try:
+        STATE_DIR.mkdir(parents=True, exist_ok=True)
+        for p in STATE_DIR.glob("once-*.lock"):
+            if p.stat().st_mtime < time.time() - 10:
+                p.unlink()
+        os.close(os.open(str(lock), os.O_CREAT | os.O_EXCL | os.O_WRONLY))
+        return True
+    except FileExistsError:
+        return False
+    except Exception:
+        return True
 
 
 def main() -> int:
@@ -164,6 +191,8 @@ def main() -> int:
         return 0
     s = load_settings()
     session = str(data.get("session_id") or "unknown")
+    if not first_run(data):
+        return 0
     state = load_state(session)
     ui_parts, model_parts = [], []
 

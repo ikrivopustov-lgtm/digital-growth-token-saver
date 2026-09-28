@@ -20,6 +20,12 @@
 #   --keep-model             не менять model/model_reasoning_effort корня в .codex/config.toml
 #   --with-orchestrator-skill  поставить $astra-orchestrator (вызывать только явно)
 #   --skip-aif | --skip-astra | --skip-hooks
+#   --default-model MODEL    [вариант 1] модель по умолчанию в ~/.codex/config.toml (напр. gpt-6-sol
+#                            или gpt-6-luna); на сильную переходить вручную через /model
+#   --default-effort E       effort к --default-model (по умолчанию medium)
+#   --global-rules           [вариант 2] блок правил в ~/.codex/AGENTS.md и хук в ~/.codex/hooks.json —
+#                            работают в любом чате, в т.ч. в чатах приложения вне проектов
+#   --no-project             только глобальная часть, проект не трогать
 #   --vendor-dir DIR         взять codex-astra-luna-orchestrator из локальной папки (без git clone)
 #   --force                  перезаписывать существующие профили и роли
 #   --yes                    не задавать вопросов
@@ -30,6 +36,7 @@ SRC="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PROJECT="."; ASTRA="pro"; STRONG="gpt-6-astra"; CHEAP="gpt-6-luna"; AIF_AGENTS="codex"
 ROLE_EFFORT="medium"; ALIGN_AIF=0; KEEP_MODEL=0; WITH_ORCH=0; SKIP_AIF=0; SKIP_ASTRA=0; SKIP_HOOKS=0
 VENDOR_DIR=""; FORCE=0; YES=0; DRY=0
+DEFAULT_MODEL=""; DEFAULT_EFFORT="medium"; GLOBAL_RULES=0; NO_PROJECT=0
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -46,6 +53,10 @@ while [ $# -gt 0 ]; do
     --skip-astra) SKIP_ASTRA=1; shift ;;
     --skip-hooks) SKIP_HOOKS=1; shift ;;
     --vendor-dir) VENDOR_DIR="$2"; shift 2 ;;
+    --default-model) DEFAULT_MODEL="$2"; shift 2 ;;
+    --default-effort) DEFAULT_EFFORT="$2"; shift 2 ;;
+    --global-rules) GLOBAL_RULES=1; shift ;;
+    --no-project) NO_PROJECT=1; shift ;;
     --force) FORCE=1; shift ;;
     --yes|-y) YES=1; shift ;;
     --dry-run) DRY=1; shift ;;
@@ -80,9 +91,11 @@ done
 [ -n "$PY" ] || { echo "Нужен python >= 3.11 (tomllib). macOS: brew install python@3.12" >&2; exit 1; }
 info "python: $PY"
 if command -v codex >/dev/null; then info "codex: $(codex --version 2>/dev/null | head -1)"; else info "codex: не найден в PATH (установка продолжится)"; fi
-case "$PROJECT" in "$SRC"|"$SRC"/*) echo "Проект не должен быть папкой скилла" >&2; exit 2 ;; esac
-[ -d "$PROJECT/.git" ] || info "! $PROJECT не git-репозиторий — ai-factory и откаты удобнее с git"
-info "проект: $PROJECT"
+if [ "$NO_PROJECT" = 0 ]; then
+  case "$PROJECT" in "$SRC"|"$SRC"/*) echo "Проект не должен быть папкой скилла" >&2; exit 2 ;; esac
+  [ -d "$PROJECT/.git" ] || info "! $PROJECT не git-репозиторий — ai-factory и откаты удобнее с git"
+  info "проект: $PROJECT"
+fi
 info "модели: strong=$STRONG cheap=$CHEAP · профиль Astra/Luna: $ASTRA · effort ролей: $ROLE_EFFORT"
 
 # ---------------------------------------------------------------- global
@@ -122,6 +135,28 @@ for prof in fast impl deep; do
   sed -e "s/{{STRONG_MODEL}}/$STRONG/g" -e "s/{{CHEAP_MODEL}}/$CHEAP/g" "$SRC/templates/profiles/$prof.config.toml" > "$dst"
   info "✓ профиль $prof → $dst"
 done
+
+# ---------------------------------------------------------------- global defaults (варианты 1 и 2)
+if [ -n "$DEFAULT_MODEL" ] || [ "$GLOBAL_RULES" = 1 ]; then
+  say "1b. Глобальные настройки Codex (~/.codex)"
+  GC=()
+  [ -n "$DEFAULT_MODEL" ] && GC+=(--model "$DEFAULT_MODEL" --effort "$DEFAULT_EFFORT")
+  [ "$GLOBAL_RULES" = 1 ] && GC+=(--hooks)
+  "$PY" "$SRC/scripts/tsctl.py" global-config "${GC[@]}" $DRYFLAG
+  if [ "$GLOBAL_RULES" = 1 ]; then
+    PYH="$(command -v python3 || echo "$PY")"
+    "$PY" "$SRC/scripts/tsctl.py" hooks --global --guard-cmd "$PYH $TS_HOME/context_guard.py" $DRYFLAG
+    "$PY" "$SRC/scripts/tsctl.py" agents-md --global --template "$SRC/templates/AGENTS.global.md" $DRYFLAG
+    info "! В Codex один раз одобри хук: /hooks"
+  fi
+fi
+
+if [ "$NO_PROJECT" = 1 ]; then
+  say "Готово (только глобальная часть)"
+  [ "$DRY" = 1 ] && info "Это был dry-run — ничего не изменено."
+  info "Проверка: ~/.codex/token-saver/tsctl status"
+  exit 0
+fi
 
 # ---------------------------------------------------------------- vendor
 ASTRA_SRC=""

@@ -19,6 +19,7 @@ description: Экономия токенов в Codex без потери кач
 |---|---|
 | Установить в проект | `bash ~/.codex/token-saver/install.sh --project .` |
 | Проверить состояние | `~/.codex/token-saver/tsctl status --project .` |
+| Модель по умолчанию и правила для всех чатов | `bash ~/.codex/token-saver/install.sh --no-project --default-model <модель> --global-rules` (сначала `--dry-run`, только по просьбе пользователя) |
 | Делегировать рутину | `bash ~/.codex/token-saver/delegate.sh [-w] "<задача>"` |
 | Расход по сессии с субагентами | `python3 ~/.codex/token-saver/vendor/codex-astra-luna-orchestrator/scripts/token_usage.py --latest` |
 

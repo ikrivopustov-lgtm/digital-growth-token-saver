@@ -4,7 +4,8 @@
 Subcommands:
   merge-config  слить профиль Astra/Luna в .codex/config.toml, сохранив ai-factory и ваши ключи
   agents-md     вставить/обновить блок token discipline в AGENTS.md
-  hooks         подключить context_guard в .codex/hooks.json
+  hooks         подключить context_guard в .codex/hooks.json (--global: ~/.codex/hooks.json)
+  global-config модель по умолчанию и features.hooks в ~/.codex/config.toml
   status        показать состояние сетапа
 
 Требует python >= 3.11 (tomllib). Только стандартная библиотека.
@@ -187,8 +188,7 @@ ASTRA_LINE = re.compile(r"^.*use the `astra-orchestrator` skill when its trigger
 
 
 def cmd_agents_md(a) -> int:
-    proj = Path(a.project).resolve()
-    p = proj / "AGENTS.md"
+    p = HOME / "AGENTS.md" if a.glob else Path(a.project).resolve() / "AGENTS.md"
     block = Path(a.template).read_text(encoding="utf-8").strip() + "\n"
     cur = p.read_text(encoding="utf-8") if p.exists() else "# Project instructions\n"
     cur = ASTRA_LINE.sub("", cur)
@@ -198,7 +198,8 @@ def cmd_agents_md(a) -> int:
         new = pre + block.strip() + post
     else:
         new = cur.rstrip() + "\n\n" + block
-    write(p, new if new.endswith("\n") else new + "\n", a.dry_run, "AGENTS.md (блок token discipline)")
+    label = "~/.codex/AGENTS.md" if a.glob else "AGENTS.md"
+    write(p, new if new.endswith("\n") else new + "\n", a.dry_run, f"{label} (блок token discipline)")
     size = len(new.encode())
     if size > 24_000:
         print(f"  ! AGENTS.md {size} байт — он читается каждый ход. Вынеси длинные разделы в docs/ со ссылками.")
@@ -208,9 +209,21 @@ def cmd_agents_md(a) -> int:
 # ---------------------------------------------------------------- hooks
 
 
+def _has_guard(p: Path) -> bool:
+    try:
+        return "context_guard.py" in p.read_text(encoding="utf-8")
+    except Exception:
+        return False
+
+
 def cmd_hooks(a) -> int:
-    proj = Path(a.project).resolve()
-    p = proj / ".codex" / "hooks.json"
+    if a.glob:
+        p = HOME / "hooks.json"
+    else:
+        p = Path(a.project).resolve() / ".codex" / "hooks.json"
+        if _has_guard(HOME / "hooks.json") and not _has_guard(p):
+            print("  = хук уже подключён глобально (~/.codex/hooks.json) — в проект не добавляю")
+            return 0
     data = {}
     if p.exists():
         try:
@@ -228,7 +241,34 @@ def cmd_hooks(a) -> int:
             "statusMessage": "token-saver: контекст",
             "timeout": 10,
         }]})
-    write(p, json.dumps(data, ensure_ascii=False, indent=2) + "\n", a.dry_run, ".codex/hooks.json")
+    write(p, json.dumps(data, ensure_ascii=False, indent=2) + "\n", a.dry_run,
+          "~/.codex/hooks.json" if a.glob else ".codex/hooks.json")
+    return 0
+
+
+# ---------------------------------------------------------------- global-config
+
+
+def cmd_global_config(a) -> int:
+    p = HOME / "config.toml"
+    cur = load_toml(p)
+    new = dict(cur)
+    if a.model:
+        new["model"] = a.model
+    if a.effort:
+        new["model_reasoning_effort"] = a.effort
+    if a.hooks:
+        new["features"] = dict(new.get("features", {}))
+        new["features"]["hooks"] = True
+    if new == cur:
+        print("  = ~/.codex/config.toml: без изменений")
+        return 0
+    # верхнеуровневые ключи должны идти до таблиц — dump_toml это гарантирует
+    text = "# Managed in part by codex-token-saver. Backups: config.toml.bak-*\n" + dump_toml(new)
+    validate_roundtrip(text)
+    if p.exists() and "#" in p.read_text(encoding="utf-8"):
+        print("  ! комментарии в ~/.codex/config.toml не сохранятся (оригинал — в бэкапе)")
+    write(p, text, a.dry_run, "~/.codex/config.toml")
     return 0
 
 
@@ -249,6 +289,12 @@ def cmd_status(a) -> int:
         p = HOME / f"{prof}.config.toml"
         d = load_toml(p) if p.exists() else {}
         print(f"  {ok(p.exists())} профиль {prof}: {d.get('model','—')} / {d.get('model_reasoning_effort','—')}")
+    gcfg = load_toml(HOME / "config.toml")
+    print(f"  · ~/.codex/config.toml: model={gcfg.get('model','—')}/{gcfg.get('model_reasoning_effort','—')} "
+          f"hooks={gcfg.get('features',{}).get('hooks',False)}")
+    gh = _has_guard(HOME / "hooks.json")
+    ga = HOME / "AGENTS.md"
+    print(f"  {'✓' if gh else '·'} глобальный хук   {'✓' if ga.exists() and MARK_START in ga.read_text(encoding='utf-8') else '·'} глобальный AGENTS.md")
     cfg = load_toml(proj / ".codex" / "config.toml")
     ag = cfg.get("agents", {})
     print(f"  {ok(bool(cfg))} .codex/config.toml: root={cfg.get('model','(глобальный)')}/{cfg.get('model_reasoning_effort','—')} "
@@ -262,8 +308,8 @@ def cmd_status(a) -> int:
     else:
         print("  ✗ роли .codex/agents/ не найдены")
     hj = proj / ".codex" / "hooks.json"
-    hooked = hj.exists() and "context_guard.py" in hj.read_text()
-    print(f"  {ok(hooked)} хук context_guard")
+    hooked = _has_guard(hj)
+    print(f"  {ok(hooked or gh)} хук context_guard" + ("" if hooked else " (глобальный)" if gh else ""))
     agents = proj / "AGENTS.md"
     txt = agents.read_text(encoding="utf-8") if agents.exists() else ""
     print(f"  {ok(MARK_START in txt)} AGENTS.md блок ({len(txt.encode())} байт)")
@@ -287,10 +333,16 @@ def main() -> int:
     m.set_defaults(fn=cmd_merge_config)
 
     g = sub.add_parser("agents-md"); g.add_argument("--project", default="."); g.add_argument("--template", required=True)
+    g.add_argument("--global", dest="glob", action="store_true")
     g.add_argument("--dry-run", action="store_true"); g.set_defaults(fn=cmd_agents_md)
 
     h = sub.add_parser("hooks"); h.add_argument("--project", default="."); h.add_argument("--guard-cmd", required=True)
+    h.add_argument("--global", dest="glob", action="store_true")
     h.add_argument("--dry-run", action="store_true"); h.set_defaults(fn=cmd_hooks)
+
+    c = sub.add_parser("global-config"); c.add_argument("--model"); c.add_argument("--effort")
+    c.add_argument("--hooks", action="store_true"); c.add_argument("--dry-run", action="store_true")
+    c.set_defaults(fn=cmd_global_config)
 
 
     s = sub.add_parser("status"); s.add_argument("--project", default="."); s.set_defaults(fn=cmd_status)

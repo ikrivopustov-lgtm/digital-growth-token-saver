@@ -248,6 +248,30 @@ bash scripts/install.sh --project <repo> [опции]
 | `--force` | выкл. | перезаписать существующие профили и роли (с бэкапом) |
 | `--yes` | выкл. | не задавать вопросов |
 | `--dry-run` | выкл. | только показать план изменений |
+| `--default-model MODEL` | — | модель по умолчанию в `~/.codex/config.toml` (например `gpt-6-sol` или `gpt-6-luna`). Остальные ключи сохраняются, делается бэкап |
+| `--default-effort E` | `medium` | effort к `--default-model` |
+| `--global-rules` | выкл. | блок правил в `~/.codex/AGENTS.md` и хук в `~/.codex/hooks.json`: работают в любом чате, в том числе в чатах приложения вне проектов |
+| `--no-project` | выкл. | только глобальная часть, проект не трогать |
+
+### Модель по умолчанию и правила для всех чатов
+
+Модель чата сама не переключается: хук может только добавить текст к запросу, а профили `-p`
+работают только в терминале. Поэтому экономия достигается двумя способами:
+
+1. **Дешёвая модель по умолчанию** (`--default-model`). На сильную переходите вручную через `/model`
+   или список моделей в приложении. Если задача сложная, а модель не сильная (Luna, Sol и т.п.),
+   хук подскажет переключиться.
+2. **Правила и хук для всех чатов** (`--global-rules`). Приложение создаёт чаты вне проектов,
+   где проектного AGENTS.md и хука нет. Глобальный блок (~1,7 КБ) и хук работают везде.
+   Хук нужно один раз одобрить в `/hooks`. Если хук стоит и глобально, и в проекте, сообщение
+   придёт одно; новые проекты при глобальном хуке своего хука не получают.
+
+```bash
+bash ~/.codex/token-saver/install.sh --no-project --default-model gpt-6-sol --global-rules --dry-run
+```
+
+Эти флаги по умолчанию выключены: без них установщик глобальный `config.toml`, `AGENTS.md`
+и `hooks.json` не трогает.
 
 ## Что меняется на диске
 
@@ -256,6 +280,8 @@ bash scripts/install.sh --project <repo> [опции]
 | `~/.codex/{fast,impl,deep}.config.toml` | профили | удалить файлы |
 | `~/.codex/token-saver/` | `tsctl`, `context_guard.py`, `delegate.sh`, `settings.json`, копия ролей donvito | удалить папку |
 | `~/.agents/skills/codex-token-saver/` | скилл `$codex-token-saver` | удалить папку |
+| `~/.codex/config.toml` | только с `--default-model` / `--global-rules`: `model`, `model_reasoning_effort`, `features.hooks` (комментарии файла не сохраняются) | `config.toml.bak-*` |
+| `~/.codex/AGENTS.md`, `~/.codex/hooks.json` | только с `--global-rules`: блок правил и хук | `*.bak-*` или удалить блок/запись |
 | `<repo>/.ai-factory/`, `.codex/skills/` | ai-factory: план, скиллы `$aif-*` | по [документации ai-factory](https://github.com/lee-to/ai-factory) |
 | `<repo>/.codex/config.toml` | слияние: ключи ai-factory сохраняются, модели берутся из ролей, включаются хуки | `config.toml.bak-*` |
 | `<repo>/.codex/agents/*.toml` | роли рядом с агентами ai-factory, имена не пересекаются | удалить 5 файлов ролей |
